@@ -1,24 +1,31 @@
 const jwt = require('jsonwebtoken');
 const db = require('../db/db');
+const authModule = require('../db/auth');
 const logger = require('../util/logger');
+const bcrypt = require('bcrypt');
 
 function authenticateUser(req, res, next) {
   //authenticate user
   logger.winston.info('Authenticate User');
-  if (req.body.username === 'admin' && req.body.password === 'admin') {
+  var username = req.body.username;
+  var password = req.body.password;
+  authModule.login(req, res, next)
+  .then (function(result) {
     //create token and send it back
-    const tokenData = { username: 'admin', name: 'Portal Administrator' };
+    const tokenData = { username: username, name: 'Portal Administrator' };
     // if user is found and password is right
     // create a token
     const token = jwt.sign(tokenData, global.jwtsecret);
     // return the information including token as JSON
-    res.json({ username: 'admin', token });
-  } else {
+    res.json({ username: username, token });
+  })
+  .catch (function (err) {
     logger.winston.info('Information didnt match or not provided.');
     return res.status(401).send({
       success: false,
-      message: 'Username and password didnt match.'});
-  }
+      message: 'Username and password didnt match.'
+    });
+  });
 }
 
 function authenticateClient(req, res, next) {

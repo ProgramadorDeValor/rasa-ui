@@ -13,3 +13,5 @@ Jenkinsfile
 # env
 .env
 
+.vscode
+
